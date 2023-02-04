@@ -811,7 +811,11 @@ ssh密钥得作用：
 
   tips: mac获取公钥 https://juejin.cn/post/6844904169191522317
 
+### github 生成ssh key
 
+1. 打开 Git Bash
+2. ssh-keygen - t rsa -b 4096 -C "your_email@example.com"
+3. 连续敲击三次回车，可在  `C:\User\用户名文件夹\.ssh` 的目录生成密钥文件
 
 ### git push
 
@@ -888,6 +892,38 @@ git checkout -t origin/develop     #远端分支名和本地新建分支名同�
 **后续拉取该分支的更新，就是切换到该分支，git  pull  origin 分支名**
 
 小技巧：这个命令不好记，可以利用vscode快速切换拉取
+
+
+
+### git remote show
+
+> 查看远程仓库所有的分支列表
+
+```
+git remote show 远程仓库名称
+```
+
+### 追踪分支
+
+```js
+//从远程仓库中，把对应的远程分支下载到本地仓库，保持本地分支和远程分支名相同
+git checkout 远程分支的名称
+
+//示例：git checkout pay
+
+////从远程仓库中，把对应的远程分支下载到本地仓库，并把下载的本地分支进行重命名
+git checkout -b 本地分支名称 远程仓库名称/远程分支名称
+```
+
+### 删除远程分支
+
+```js
+//删除远程仓库中，指定名称的远程分支
+git push 远程仓库名称 --delete 远程分支名称
+
+//示例
+git push origin --delete login
+```
 
 
 

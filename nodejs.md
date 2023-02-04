@@ -1443,7 +1443,12 @@ npm init
 
 初始化之后，会在项目目录中生成 package.json 的文件。
 
+注意：
 
+1. 上述命令只能在英文的目录下运行成功！所以，项目文件夹的名称一定要使用英文命名，**不要使用中文，不能出现空格。**
+2. 运行 npm install 命令安装包的时候，npm包管理工具会把包的名称和版本号，记录到 package.json中。
+
+​      
 
 ## 2.4 什么第三方模块
 
@@ -1465,7 +1470,7 @@ npm init
 npm install 模块名
 npm i 模块名
 
-npm i 模块名@版本号   安装固定版本
+npm i 模块名@版本号   安装固定版本 使用 `npm i` 命令安装包的时候，会自动安装最新版本的包，可以手动安装指定版本的包
 ```
 
 卸载模块
@@ -1476,6 +1481,14 @@ npm un 模块名
 ```
 
 ![image-20230131150937117](assets\npm1.png)
+
+```
+node_modules文件夹用来存放所有已安装到项目中的包。require()导入第三方包时，就是从这个目录中查找并加载包。
+package-lock.json配置文件用来记录 node_modules目录下的每一个包的下载信息，例如包的名字，版本号，下载地址等。
+注意：程序员不要手动修改 node_modules或package-lock.json文件中的任何代码，npm包管理工具会自动维护它们。
+```
+
+
 
 ## 2.6 关于项目模块的说明
 
@@ -1634,6 +1647,352 @@ https://www.jianshu.com/p/90893d947432
 ![](assets\jxy.png)
 
 
+
+### 拓展
+
+#### 1.包的语义化版本
+
+```js
+包的版本号是以“点分十进制”形式进行定义的，总共有三位数字，例如 2.24.0
+其中每一位数字所代表的含义如下：
+第一位数字：大版本
+第二位数字：功能版本
+第三位数字：Bug修复版本
+
+版本号提升的规则：只要前面的版本号增长了，则后面的版本号归零。
+```
+
+#### 2.包管理配置文件
+
+`npm`规定，在项目跟目录中，必须提供一个叫做 `package.json`的包管理配置文件。用来记录与项目相关的一些配置信息。
+
+- 项目的名称，版本号，描述等
+- 项目中都用到了那些包
+- 那些包只在开发期间会用到
+- 那些包在开发和部署时都需要用到
+
+#### 3.多人协作的问题
+
+遇到的问题：第三方包的体积过大，不方便成员之间共享项目源代码。
+
+解决方案：共享时剔除`node_modules`
+
+```
+如何记录项目中安装了那些包：
+在项目的根目录中，创建一个叫 package.json 的配置文件（git init -y），即可用来记录项目中安装了哪些包。
+从而方便剔除 node_modules目录之后，在团队成员之间共享项目的源代码。
+
+注意：今后在项目开发中，一定要把 node_modules文件夹，添加到 .gitignore忽略文件中！！！
+```
+
+#### 4. devDependencies
+
+如果某些包 只在项目开发阶段会用到， 在项目上线之后不会用到，则建议把这些包记录到 devDependencies节点中。
+
+与之对应的，如果某些包在开发和项目上线之后都需要用到则建议把这些包记录到 dependencies节点中。
+
+可以使用如下了命令，将包记录到devDependencies节点中：
+
+```js
+//安装指定的包，并记录到 devDependencies节点中
+npm i 包名 -D
+
+//注意：上述命令是简写形式，等价于下面的完整写法：
+npm install 包名 --save-dev
+```
+
+#### 4.解决下包慢的问题
+
+在使用npm下包的时候，默认从国外的 https://registry.npmjs.org/服务器进行下载，此时，网络数据的传输需要经过漫长的海底光缆。
+
+更改镜像源
+
+```js
+//查看当前的下包镜像源  //检查镜像源是否下载成功
+npm config get registry
+
+//将下包的镜像源切换为淘宝镜像源
+npm config set registry=https://registry.npm.taobao.org/
+
+```
+
+
+
+#### 5.包的分类
+
+1. 项目包 ：那些被安装到项目的 node_modules 目录中的包，都是项目包。
+
+   - 开发依赖包：被记录到 devDependencies 节点中的包，只在开发期间会用到。-D
+   - 核心依赖包：被记录到 dependencies 节点中的包，只在开发期间和项目上线之后都会用到。
+
+2. 全局包
+
+   - 在执行 npm install 命令时，如果提供了 -g 参数，则会把包安装为 全局包。
+   - 只有工具性质的包，才会全局安装的必要性，因为他们提供了好用的终端命令。
+   - 判断某个是否需要全局安装的包，参考官方提供的使用说明即可。
+
+3. i5ting_toc
+
+   - 是一个可以把 md文档转为html页面的小工具，使用步骤为下：
+
+   ```js
+   //将 i5ting_toc 安装为全局包
+   npm install -g i5ting_toc
+   
+   //调用 i5ting_toc,轻松实现 md 转 html 的功能
+   i5ting_toc -f 要转换的md文件路径 -o
+   ```
+
+#### 6.规范的包结构
+
+一个规范的包，它的组成结构，必须符合以下3个要求：
+
+1. 包必须以单独的目录而存在
+2. 包的顶级目录下要必须包含 package.json这个包管理配置工具
+3. package.json中必须包含 name，version，main这三个属性，分别代表包的名字，版本号，包的入口
+
+https://yarnpkg.com/zh-Hans/docs/package-json
+
+
+
+#### 7.开发属于自己的包
+
+1. 需要实现的功能
+
+   ```js
+   - //格式化日期
+   - //转义 html中的特殊字符
+   - //还原html中的特殊字符
+   //1.导入自己的包
+   const myBao = require('./myBao-tools')
+   //-------功能1：格式化日期-----
+   const dt = myBao.dateFormat(new Date())
+   //输出 2022-02-04  16：41：08
+   console.log(dt)
+   //-------功能2:转移html中特殊字符
+   const htmlStr = '<h1 style="color:red;">你好！ &copy;<span>小黄！</span></h1>'
+   const str = myBao.htmlEscape(htmlStr)
+   console.log(str)
+   //--------功能3：还原html中的特殊字符
+   const rawHTML = myBao.htmlUnEscape(str)
+   console.log(rawHTML)
+   
+   ```
+
+2. 初始化包的基本结构
+
+   - 新建 myBao-tools文件夹，作为包的根目录
+   - 在myBao-tools文件夹中新建3个文件：
+     1. package.json （包管理配置文件）
+     2. index.js （包的入口文件）
+     3. README.md （包的说明文档）
+
+3. 初始化package.json
+
+   ```js
+   {
+     "name": "myBao-tools",
+     "version": "1.0.0",
+     "main": "index.js",
+      "description": "提供了格式化时间，HTMLEscape的功能",
+     "keywords": ["myBao","dateFormat","escape"],
+     "author": "",
+     "license": "ISC"
+   }
+   
+   ```
+
+4. 在index.js中定义格式化时间的方法
+
+   ```js
+   //dateFormat.js
+   //格式化时间的方法
+   function dateFormat(dateStr) {
+       const dt = new Date(dateStr)
+       
+       const y = dt.getFullYear()
+       const m =  padZero(dt.getMonth() + 1)
+       const d =  padZero(dt.getDate())
+       const hh =  padZero(getHours())
+       const mm =  padZero(getMinutes())
+       const ss =  padZero(getSeconds())
+       
+       return `${y}-${m}=${d} ${hh}:${mm}:${ss}`
+   }
+   //补零的方法
+   function padZero(n) {
+       return n>9? n:'0' + n
+   }
+   
+   module.exports = {
+       dateFormat
+   }
+   ```
+
+5. 在index.js中定义转义HTML的方法
+
+   ```js
+   // htmlEscape.js --1
+   function htmlEscape(htmlStr) {
+       return htmlStr.replace(/<|>|"|&/g,(match)=> {
+           switch(match) {
+               case '<':
+                   return '&lt;'
+               case '>':
+                   return '&gt;'
+               case '"':
+                   return '&quot;'
+               case '&':
+                   return '&amp;'
+           }
+       })
+   }
+   ```
+
+6. 在 index.js中定义还原HTML的方法
+
+   ```js
+    //htmlEscape.js  --2
+   function htmlUnEscape(str) {
+       return str.replace(/&lt;|&gt;|&quot;|&amp;/g,(match)=> {
+           switch(match) {
+               case '&lt;':
+                   return '<'
+               case '&gt;':
+                   return '>'
+               case '&quot;':
+                   return '"'
+               case '&amp;':
+                   return '&'
+           }
+       })
+   }
+   module.exports = {
+       htmlEscape,
+       htmlUnEscape
+   }
+   ```
+
+7. 将不同的功能进行模块化的拆分
+
+   1. 将格式化时间的4功能，拆分到 src ---> dateFormat.js中
+
+   2. 将处理 HTML字符串的56功能，拆分到 src ----> htmlEscape.js中
+
+   3. 在index.js中，导入两个模块，得到需要向外共享的方法  
+
+   4. 在 index.js 中，使用 module.exports 把对应的方法共享出去
+
+      ```js
+      //index.js 入口文件
+      //导入
+      const date = require('./src/dateFormat')
+      const escape = require('./src/htmlEscape')
+      
+      //需要向外暴露的成员
+      modul.exports = {
+          ...date,
+          ...escape
+      }
+      ```
+
+8. 编写包的说明文档
+
+   包根目录中的README.md文件，是包的使用文档。通过它，我们可以事先把包的使用说明，以markdown的格式写出来，方便用户参考。具体些什么内容，没有强制性的要求。md文档中，会包含以下6项内容就可以了：
+
+   安装方式，导入方式，格式化时间，转义html中的特殊字符，还原html中的特殊字符，开源协议
+
+   ~~~js
+   ##安装
+   ```
+   npm install myBao-tools
+   ```
+   ##导入
+   ```js
+   const myBao = require('myBao-tools')
+   ```
+   ##格式化时间
+   ```js
+   //调用 dateFormat 对时间进行格式化
+   const dt = myBao.dateFormat(new Date())
+   //输出 2022-02-04  16：41：08
+   console.log(dt)
+   ```
+   ##转义html中的特殊字符
+   ```js
+   const htmlStr = '<h1 style="color:red;">你好！ &copy;<span>小黄！</span></h1>'
+   const str = myBao.htmlEscape(htmlStr)
+   console.log(str)
+   ```
+   ##还原html中的特殊字符
+   ```js
+   //待还原的字符串
+   const rawHTML = myBao.htmlUnEscape(str)
+   console.log(rawHTML)
+   ```
+   ##开源协议
+   ISC
+   ~~~
+
+#### 8.发布包
+
+1. 注册 npm账号
+
+   1. 访问https://www.npmjs.com/网站，点击 sign up，进入注册用户页面
+   2. 填写信息
+   3. 注册登录
+
+2. 登录npm账号
+
+   可以在终端中执行 `npm login`命令，依次输入用户名，密码，，邮箱后，即可登录成功。
+
+   注意：要先把下包的服务器地址切换为 npm的官方服务器，否则会导致发布失败！
+
+3. 把包发布到npm上
+
+   将终端切换到包的根目录下运行`npm publish`命令，即可将包发布到npm上(注意：包名不能雷同)
+
+4. 删除已发布的包
+
+   运行 `npm unpublish 包名 --force`命令，即可从npm删除已发布的包。
+
+   注意：
+
+   1. `npm unpublish`命令只能删除72小时以内发布的包
+   2. `npm unpublish`删除的包，在24小时内不允许重复发布
+   3. 发布包的时候要慎重，尽量不要往npm上发布没有意义的包！
+
+#### 9.模块的加载机制
+
+1. 优先从缓存中加载
+
+   模块在第一次加载后会被缓存。这也意味着多次调用require()不会导致模块的代码被执行多次。
+
+   注意：不论是内置模块，用户自定义模块，还是第三方模块，他们都会优先从缓存中加载，从而提高模块的加载效率。
+
+2. 内置模块的加载机制
+
+   内置模块是由Nodejs官方提供的模块，内置模块的加载优先级最高。
+
+   例如：require('fs')始终返回内置的fs的模块，即使在node_modules目录下有名字相同的包也叫fs。
+
+3. 自定义模块的加载机制
+
+   使用require()加载自定义模块时，必须指定以 ./ 或 ../ 开头的路径标识符。在加载自定义模块时，如果没有指定 ./ 或者 ../ 这样的路径标识符，则node会把它当作内置模块或第三方模块进行加载。
+
+4. 第三方模块的加载机制
+
+   如果传递给require()的模块标识符不是一个内置模块，也没有以 ./ 或 ../ 开头，则nodejs会从当前模块的父目录开始，尝试从 /node_modules文件夹中加载第三方模块。
+
+   如果没有找到第三方模块，则移动到再上一层父目录中，进行加载，直到文件系统的根目录。
+
+5. 目录作为模块的加载机制
+
+   当把目录作为模块标识符，传递给require()进行加载的时候，有三种加载方式：
+
+   - 在被加载的目录下查找一个叫做 package.json的文件，并寻找main属性，作为require()加载的入口
+   - 如果目录里没有package.json文件，或者main入口不存在或无法解析，则nodejs将会试图加载目录下的index.js文件
+   - 如果以上两部都失败了，则nodejs会在终端打印错误消息，报告模块的缺失：Error:Cannot find module 'xxx'
 
 
 
