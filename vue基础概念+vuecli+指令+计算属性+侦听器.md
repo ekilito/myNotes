@@ -332,13 +332,14 @@ export default {
 //Property or method "xxx" is not defined => 你用的这个变量，它找不到
    <h1>{{ gaga }}</h1>
    ```
+
+​         (2)  能使用表达式, 但是不能使用 if  for 
+
 ```html
-(2)  能使用表达式, 但是不能使用 if  for
-   
-   <h1>{{ if(obj.age>18){}}</h1>  
+ <h1>{{ if(obj.age>18){}}</h1>  
 ```
 
-   (3)  不能在标签属性中使用
+​         (3)  不能在标签属性中使用
 
    ```jsx
    <h1 id="box" class="box" title="{{ msg }}"></h1>  //不能在标签属性中使用{{}} 语法已被废弃    v-bind
