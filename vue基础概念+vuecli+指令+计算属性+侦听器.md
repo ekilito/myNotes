@@ -335,7 +335,6 @@ export default {
 ```jsx
 (2)  能使用表达式, 但是不能使用 if  for
    
-​```jsx
    <h1>{{ if (obj.age > 18 ) { }   }}</h1>  /不能使用 if  for                              v-if  v-for
 ```
 
