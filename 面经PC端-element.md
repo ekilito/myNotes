@@ -195,9 +195,23 @@ yarn add element-ui
 - 在`main.js`中
 
 ```jsx
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-Vue.use(ElementUI);
+import Vue from 'vue'
+import App from './App.vue'
+import router from './router'
+import store from './store'
+// 全部导入 element-ui 所有的组件都能直接用
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+Vue.use(ElementUI)
+
+Vue.config.productionTip = false
+
+new Vue({
+  router,
+  store,
+  render: h => h(App)
+}).$mount('#app')
+
 ```
 
 - 演示
@@ -336,9 +350,11 @@ Vue.prototype.$message = Message;
 - 直接导入main.js中
 
 ```jsx
-// 直接导入vant-ui.js
+// 直接导入element-ui.js
 import '@/utils/element.js'
 ```
+
+![](images\elementdr.png)
 
 
 
@@ -457,7 +473,7 @@ export const delToken = () => {
 
 ## 路由设计配置
 
-但凡是: 单个页面，独立展示的，都是一级路由  (登录  注册   首页架子   文章详情 ...)
+但凡是: **单个页面，独立展示的，都是一级路由**  (登录  注册   首页架子   文章详情 ...)
 
 路由设计：
 
@@ -565,7 +581,7 @@ const router = new VueRouter({
     {
       path: '/',
       component: Layout,
-      redirect: '/dashboard',
+      redirect: '/dashboard', //重定向 http://localhost:8080/#/dashboard
       children: [
         { path: 'dashboard', component: Dashboard },
         { path: 'article', component: Article }
@@ -584,6 +600,8 @@ export default router
   <div>
     <div>头部</div>
     <div>侧边</div>
+      
+       <!-- 二级路由出口 -->
     <router-view></router-view>
   </div>
 </template>
@@ -623,36 +641,69 @@ export default {
 
 控制组件的样式：
 
-1. 直接通过组件名 同名的 类， 进行控制样式
+1. **直接通过组件名 同名的 类， 进行控制样式**
 
-2. 自己通过添加 class 类名，进行控制样式
+2. **自己通过添加 class 类名，进行控制样式**
+
+```js
+<style lang="scss">
+   //如何给组件标签设置样式
+   //1.给组件标签,加类
+   //  添加的类，会自动加上渲染出来的组件的根元素上
+   /* .mycard {
+    width: 420px;
+    margin: 0 auto;
+   } */
+
+    //2.直接使用组件标签名，作为类名控制样式
+    //  组件库定义组件的规范：声明的所有组件的根元素， 有一个和组件名同名的类名(提供给你了)
+    .el-card {
+      width: 420px;
+      margin: 0 auto;
+    }
+</style>
+```
 
 
 
 默认，写在scoped中的样式，只会影响到当前组件模板中的元素内容
 
-深度作用选择器：向下影响到子元素的样式
+**深度作用选择器：向下影响到子元素的样式**
 
- ::v-deep (scss)
+ **::v-deep (scss)**
 
-/deep/  (less)
+**/deep/  (less)**
 
-```jsx
+![](images\v-deep.png)
+
+
+
+```js
 <template>
   <div class="login-page">
     <el-card class="el-card">
+      //header插槽 
       <template #header>黑马面经运营后台</template>
+        
+     // 默认插槽 <template>不用写，直接作为主体
+     // el-form 整个form组件
+     // el-form-item 表单域，一行，可以存放格式类型的表单元素
+     // el-input 文本域
       <el-form>
+          
         <el-form-item label="用户名：">
           <el-input placeholder="请输入用户名" />
         </el-form-item>
+          
         <el-form-item label="密码：">
           <el-input placeholder="请输入密码：" />
         </el-form-item>
+          
         <el-form-item>
           <el-button type="primary">登录</el-button>
           <el-button>重置</el-button>
         </el-form-item>
+          
       </el-form>
     </el-card>
   </div>
@@ -665,17 +716,39 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.el-card {
-  width: 420px;
-  margin: 0 auto;
-  // 深度作用选择器   ::v-deep   /deep/
-  ::v-deep .el-card__header {
-    background: rgba(114,124,245,1);
-    text-align: center;
-    color: white;
-  }
-}
+   //如何给组件标签设置样式
+   //1.给组件标签,加类
+   //  添加的类，会自动加上渲染出来的组件的根元素上
+   /* .mycard {
+    width: 420px;
+    margin: 0 auto;
+   } */
+
+    //2.直接使用组件标签名，作为类名控制样式
+    //  组件库定义组件的规范：声明的所有组件的根元素， 都有一个和组件名同名的类名(提供给你了)
+
+    //加上scoped，可以让样式，只作用于当前组件模板(局部样式)
+    //默认scoped样式，不会向下渗透，影响到其他子组件的（除了根元素）
+    //如果希望样式，可以向下渗透，影响到下面的子孙后代，就需要用到深度作用选择器(vue提供)
+
+    //深度作用选择器：
+    // ::v-deep    acss
+    // /deep/      less
+
+    .el-card {
+      width: 420px;
+      margin: 0 auto;
+      //原理：一旦选择器前面有深度作用标识，就会 不会附加属性选择器的限制
+      //.el-card__header 渲染出来的类名
+      ::v-deep .el-card__header {
+        background-color: pink;
+        text-align: center;
+        color: #fff;
+      }
+
+    }
 </style>
+
 ```
 
 样式美化：
@@ -683,9 +756,9 @@ export default {
 ```jsx
 <template>
   <div class="login-page">
-    <el-card>
+    <el-card >
       <template #header>黑马面经运营后台</template>
-      <el-form autocomplete="off">
+      <el-form autocomplete="off" >
         <el-form-item label="用户名">
           <el-input placeholder="输入用户名"></el-input>
         </el-form-item>
@@ -705,7 +778,7 @@ export default {
 
 <script>
 export default {
-  name: 'login-page',
+  name: 'LoginIndex',
   data () {
     return {
 
@@ -720,15 +793,18 @@ export default {
 <style lang="scss" scoped>
 .login-page {
   min-height: 100vh;
-  background: url(@/assets/login-bg.svg) no-repeat center / cover;
+  background: url(@/assets/login-bg.svg) no-repeat center / cover;  //背景
+  //利用flex 水平垂直居中
   display: flex;
+  //垂直居中
   align-items: center;
+  //间隙两边排布
   justify-content: space-around;
   .el-card {
     width: 420px;
     ::v-deep .el-card__header{
       height: 80px;
-      background: rgba(114,124,245,1);
+      background: pink;
       text-align: center;
       line-height: 40px;
       color: #fff;
@@ -743,6 +819,7 @@ export default {
   }
 }
 </style>
+
 ```
 
 
@@ -756,10 +833,24 @@ export default {
 - element-ui的校验
 
   - el-form:  `model`属性, `rules`规则
-
-  - el-form-item:  绑定 `prop` 属性
-
+- el-form-item:  绑定 `prop` 属性
   - el-input:   绑定` v-model`
+
+  ```jsx
+       <!--
+         实现表单校验：4个关键属性
+         el-form 整个form组件
+            :model :需要绑定一个对象，对象有着很多属性，每个属性都会和表单元素双向绑定,且能明确要校验的是哪个对象
+            :rules :配置校验的规则
+         el-form-item 表单域，一行，可以存放格式类型的表单元素
+            prop   :配置字段名,决定了校验效果的配置，必须对应
+         el-input 文本域
+            v-model 和对象中的属性双向绑定，实时收集表单数据
+  1 + 4 和 2 + 3 配合使用
+         -->
+  ```
+  
+  
 
 Form 组件提供了表单验证的功能
 
@@ -799,6 +890,12 @@ rules: {
 </el-form-item>
 ```
 
+![](images\elementbdjy.png)
+
+![](images\elementbdjy2.png)
+
+
+
 
 
 ### element-ui 正则校验
@@ -830,7 +927,9 @@ rules: {
 不要忘了配置prop
 
 ```html
-<el-form-item prop="password">
+<el-form-item label="密码" prop="password">
+    <el-input v-model="form.password" type="password" placeholder="输入用户密码"></el-input>
+</el-form-item>
 ```
 
 上述已经可以完成大部分需求，如果需要更复杂业务校验需求，可以自定义校验~ （项目课程：人力资源系统会进一步讲解）
@@ -848,27 +947,31 @@ rules: {
 1. 给组件或者元素, 添加  ref 属性
 
 ```html
-<hello ref="bb"></hello>
+<el-form ref="myForm" </el-form>
 ```
 
 2. 通过 this.$refs 可以获取对应的引用, 并且调用方法
 
 ```jsx
-this.$refs.bb.sayHi()
+this.$refs.myForm.validate()
 ```
+
+![](images\el-formmethods.png)
 
 **添加登录提交的校验**
 
 ```js
-<el-form ref="form" :model="form" :rules="rules" autocomplete="off">
+<el-form ref="myForm" :model="form" :rules="rules" autocomplete="off">
 ...
-<el-button @click="login" type="primary">登 录</el-button>
+<el-button @click="clickLogin" type="primary">登 录</el-button>
 
 methods: {
-  async login () {
+  async clickLogin () {
+    // console.log(this.$refs.myForm)
     try {
-      const valid = await this.$refs.form.validate()
-      console.log(valid)
+      const res = await this.$refs.myForm.validate()
+      //console.log(res)
+      //console.log('通过校验，应该发请求！')
     } catch (e) {
       console.log(e)
     }
@@ -883,7 +986,8 @@ methods: {
 
 methods: {
   reset () {
-    this.$refs.form.resetFields()
+    // 重置表单，包含 表单内容 + 校验状态的重置 => 调用 form 方法
+    this.$refs.myForm.resetFields()
   }
 }
 ```
@@ -897,6 +1001,8 @@ methods: {
 ```jsx
 import request from '@/utils/request'
 
+// 登录 api 的封装
+// 从传过来的对象中，解构出 username 和 password
 export const login = ({ username, password }) => {
   return request.post('/auth/login', {
     username,
@@ -934,12 +1040,14 @@ export default {
   namespaced: true,
   state () {
     return {
-      token: getToken()
+      // 一进页面，默认从本地读取token数据
+      token: getToken() || ''
     }
   },
   mutations: {
     setUserToken (state, payload) {
       state.token = payload
+      //本地应该也存一份
       setToken(payload)
     }
   }
@@ -957,6 +1065,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
+    // 将来这里分模块管理数据
     user
   }
 })
@@ -970,8 +1079,15 @@ async login () {
     const valid = await this.$refs.form.validate()
     if (valid) {
       const res = await login(this.form)
-      this.$store.commit('user/setUserToken', res.data.token)
-      this.$router.push('/')
+      // console.log(res)
+        // 公司里的实际规范，将token等个人信息，存入vuex,便于各个页面组件访问 => 存storage (持久化存储)
+        // vuex中的数据，类似于data 中的数据，一旦刷新页面，就会重新初始化(vuex刷新会丢失数据)
+        // 所有访问token，访问个人信息，一律找vuex。存本地就一个目的：保证刷新之后，vuex的数据还在
+        // console.log(res.data.token)
+        this.$store.commit('user/setUserToken', res.data.token)
+        
+        // 注意：一定要等vuex token存好了，在跳首页   
+        this.$router.push('/')
     }
   } catch (e) {
     console.log(e)
@@ -990,8 +1106,30 @@ async login () {
 ```jsx
 router.beforeEach((to, from, next) => {
   const { token } = store.state.user;
+   //如果要去的路径不是首页，并且没有token 需要拦截
   if (to.path !== '/login' && !token ) return next('/login')
   next()
+})
+---------------------------------------------
+
+
+// 页面分类： 登录页 和 非登录页
+// 逻辑：登录页可以访问的，但是其他所有的页面，都需要token才能访问
+// 问题：什么时候需要拦截到登录？其他情况正常放行
+// 非登录页 且 无token => 直接拦截到登录
+
+// 全局前置导航守卫 => 实现登录访问拦截
+router.beforeEach((to, from, next) => {
+  // 通过原生vuex语法，获取到vuex中的token，记住：以vuex为主，storage为辅，统一入口！
+  const token = store.state.user.token
+
+  if (to.path !== '/login' && !token) {
+    // 需要拦截(去的不是登录，且还没有token) 拦截到登录
+    next('/login')
+  } else {
+    // 要么是去登录，要么是有token，都是直接放行
+    next()
+  }
 })
 ```
 
@@ -1006,6 +1144,7 @@ router.beforeEach((to, from, next) => {
 `api/user.js `准备api接口
 
 ```jsx
+// 获取当前的用户信息
 export const getUser = () => {
   return request.get('/auth/currentUser')
 }
@@ -1045,6 +1184,7 @@ export const getUser = () => {
           <el-link :underline="false">{{name}}</el-link>
         </div>
         <div class="logout">
+             <!-- comfirm事件 => 用户点击了确认的时候触发 -->
           <el-popconfirm title="您确认退出黑马面运营后台吗？" @confirm="handleConfirm">
             <i slot="reference" title="logout" class="el-icon-switch-button"></i>
           </el-popconfirm>
@@ -1145,6 +1285,12 @@ export default {
 
 遇到 401 错误
 
+1.没有携带 token
+
+2.带了token，但是token过期了
+
+3.带了token，但是token拼错了
+
 ![image-20220617140402138](images/image-20220617140402138.png)
 
 
@@ -1156,6 +1302,8 @@ export default {
 `utils/request.js`
 
 ```jsx
+import store from '@/store'
+
 // 添加请求拦截器
 request.interceptors.request.use(function (config) {
   // 在发送请求之前做些什么
@@ -1163,6 +1311,7 @@ request.interceptors.request.use(function (config) {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+    
   return config
 }, function (error) {
   // 对请求错误做些什么
@@ -1174,17 +1323,17 @@ request.interceptors.request.use(function (config) {
 
 ### 退出功能
 
-退出操作
+退出操作 `layout/index.vue`
 
 ```jsx
 handleConfirm () {
   // this.$router.push('/login')
-  this.$store.commit('user/logout')
+  this.$store.commit('user/logout')//退出之前操作一下vuex，调用一个user下面的logout方法
   this.$router.push('/login')
 }
 ```
 
-提供mutation
+提供mutation `store/user/index.js`
 
 ```jsx
 import { delToken, getToken, setToken } from '@/utils/storage'
@@ -1199,7 +1348,8 @@ export default {
   mutations: {
     ...,
     logout (state) {
-      state.token = null
+      state.token = null  //或者 ''
+      // 本地的也同步删除
       delToken()
     }
   }
@@ -1212,16 +1362,20 @@ export default {
 
 ### 处理token过期
 
-响应拦截器，处理token过期
+**响应拦截器，处理token过期** **401**
 
 ```jsx
-import router from '../router'
+import store from '@/store'
+import { Message } from 'element-ui'
+import router from '@/router'
 
 // 添加响应拦截器
 request.interceptors.response.use(function (response) {
   // 对响应数据做点什么
   return response.data
 }, function (error) {
+    
+    
   // 对响应错误做点什么  普通错误 + 401情况
   // console.dir(error)
   if (error.response) {
@@ -1239,9 +1393,13 @@ request.interceptors.response.use(function (response) {
       Message.error(error.response.data.message)
     }
   }
+    
+    
   return Promise.reject(error)
 })
 ```
+
+![](images\element-uitokenguoqi.png)
 
 
 
@@ -1281,7 +1439,9 @@ request.interceptors.response.use(function (response) {
       </el-col>
       <el-col :span="18">
         <el-card style="height: 504px" shadow="never">
-          <div class="chart-box" style="height: 500px"></div>
+          <div class="chart-box" style="height: 500px">
+            <!-- 图表区域 -->
+          </div>
         </el-card>
       </el-col>
       <el-col :span="8">
@@ -1413,6 +1573,7 @@ mounted初始化
 
 ```jsx
 mounted () {
+   // 基于准备好的dom，初始化echarts实例
   const myChart = echarts.init(this.$refs.box)
   // 绘制图表
   myChart.setOption({
@@ -1455,6 +1616,7 @@ mounted () {
       <el-breadcrumb-item>面经管理</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card shadow="never" border="false">
+        <!-- 配置头部 -->
       <template #header>
         <div class="header">
           <span>共 300 条记录</span>
@@ -1467,7 +1629,9 @@ mounted () {
           </el-button>
         </div>
       </template>
-
+ 
+     <!-- 内容部分 -->
+        
     </el-card>
   </div>
 </template>
@@ -1543,7 +1707,7 @@ export default {
 
 ### 表格基本 **属性解读**
 
-![image-20220707164218013](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220707164218013.png)
+![image-20220707164218013](images/image-20220707164218013.png)
 
 
 
@@ -1553,53 +1717,80 @@ export default {
 - width 列宽
 
 ```jsx
-<el-table :data="tableData" stripe style="width: 100%">
-  <el-table-column prop="date" label="日期" width="180">
-  </el-table-column>
-  <el-table-column prop="name" label="姓名" width="180">
-  </el-table-column>
-  <el-table-column prop="address" label="地址"> </el-table-column>
-</el-table>
+    <!-- 内容部分
+           el-table 表格
+           el-table-column 表格的列  lable：列名   prop 配置一列的值
+       -->
+       <el-table
+      :data="tableData"
+      style="width: 100%">
+      <el-table-column
+        prop="date"
+        label="日期"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="姓名"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="gender"
+        label="性别">
+      </el-table-column>
+      <el-table-column
+        prop="address"
+        label="地址">
+      </el-table-column>
 
-data () {
-  return {
-    tableData: [{
-      date: '2016-05-02',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1518 弄'
-    }, {
-      date: '2016-05-04',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1517 弄'
-    }, {
-      date: '2016-05-01',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1519 弄'
-    }, {
-      date: '2016-05-03',
-      name: '王小虎',
-      address: '上海市普陀区金沙江路 1516 弄'
-    }]
-  }
-},
+    </el-table>
+
+ data () {
+    return {
+      tableData: [{
+        date: '2016-05-02',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1518 弄',
+        gender: '男'
+      }, {
+        date: '2016-05-04',
+        name: '王小仙',
+        address: '上海市普陀区金沙江路 1517 弄',
+        gender: '女'
+      }]
+    }
+  },
 ```
 
 
 
 ### 发送请求获取数据
 
-![image-20220707170311356](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220707170311356.png)
+![image-20220707170311356](images/image-20220707170311356.png)
 
 新建 `api/article.js`
 
 ```jsx
 import request from '@/utils/request'
 
+// 获取文章列表
 export const getArticleList = data => {
   return request.get('/admin/interview/query', {
     params: data
   })
 }
+
+<!--
+// 获取文章列表
+export const getArticleList = ({ current, pageSize }) => {
+  return request.get('/admin/interview/query', {
+    params: {
+      current,
+      pageSize
+    }
+  })
+}
+-->
 ```
 
 `article/index.vue` created中发送初始化获取数据的请求
@@ -1607,16 +1798,18 @@ export const getArticleList = data => {
 ```jsx
 data () {
   return {
-    current: 1,
-    pageSize: 10,
-    total: 0,
-    list: []
+     list: [],
+      current: 1, // 当前页
+      pageSize: 10, // 每页条数
+      total: 0 // 总条数
   }
 },
 created () {
+  // 封装渲染列表函数
   this.initData()
 },
 methods: {
+   // 根据 当前页 和 每页条数，初始化数据
   async initData () {
     const { data } = await getArticleList({
       current: this.current,
@@ -1635,17 +1828,15 @@ methods: {
 
 ### 动态渲染表格
 
-![image-20220619055559556](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220619055559556.png)
+![image-20220619055559556](images/image-20220619055559556.png)
 
 ```jsx
 <el-table :data="list" style="width: 100%">
-  <el-table-column prop="stem" label="标题" width="400">
-  </el-table-column>
+  <el-table-column prop="stem" label="标题" width="400"> </el-table-column>
   <el-table-column prop="creator" label="作者"> </el-table-column>
   <el-table-column prop="likeCount" label="点赞"> </el-table-column>
   <el-table-column prop="views" label="浏览数"> </el-table-column>
-  <el-table-column prop="createdAt" label="更新时间" width="200">
-  </el-table-column>
+  <el-table-column prop="createdAt" label="更新时间" width="200"> </el-table-column>
 </el-table>
 ```
 
@@ -1653,27 +1844,29 @@ methods: {
 
 ### 操作按钮部分
 
-![image-20220619055609938](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220619055609938.png)
+![image-20220619055609938](images/image-20220619055609938.png)
 
 ```jsx
 <el-table :data="list" style="width: 100%">
-  <el-table-column prop="stem" label="标题" width="400">
-  </el-table-column>
+  <el-table-column prop="stem" label="标题" width="400"> </el-table-column>
   <el-table-column prop="creator" label="作者"> </el-table-column>
   <el-table-column prop="likeCount" label="点赞"> </el-table-column>
   <el-table-column prop="views" label="浏览数"> </el-table-column>
-  <el-table-column prop="createdAt" label="更新时间" width="200">
-  </el-table-column>
+  <el-table-column prop="createdAt" label="更新时间" width="200"> </el-table-column>
+    
+    <!-- 底层源码：
+           <div v-for="(item,index) in data">
+              <slot name="default" :row="item" :$index="index"></slot>
+          </div>
+       -->
   <el-table-column label="操作" width="120px">
-    <template #default="{ row }">
+       <!-- obj中有两个常用属性 => $index下标, row一行的数据对象(遍历时的一个item) -->
+    <template #default="obj">
+        <!-- {{obj.$index}}  {{obj.row.id}}-->
       <div class="actions">
-        <i
-          class="el-icon-view"
-        ></i>
-        <i
-          class="el-icon-edit-outline"
-        ></i>
-        <i class="el-icon-delete" @click="del(row.id)"></i>
+        <i class="el-icon-view"> </i>
+        <i class="el-icon-edit-outline"> </i>
+        <i class="el-icon-delete" @click="del(obj.row.id)"></i>
       </div>
     </template>
   </el-table-column>
@@ -1690,6 +1883,15 @@ del (id) {
 ### 分页渲染
 
 ```jsx
+    <!--
+      @size-change            每页条数变化，每页10条 => 每页20条
+      @current-change         当前页变化，重新加载数据---
+      :current-page="当前页"   绑定当前生效的是第几页,控制高亮---
+      :page-sizes="[100, 200, 300, 400]" 可供选择的每页条数
+      :page-size="100"        当前生效的每页条数---
+      :total="值"             总数量---
+      layout                  布局容器，设定有哪些控件展示在页面中
+     -->
 <el-pagination
   background
   @current-change="handleCurrentChange"
@@ -1703,7 +1905,10 @@ del (id) {
 
 handleCurrentChange (val) {
   // 处理当前页变化
+  // console.log(val)
+  // 更新当前页
   this.current = val
+  // 重新根据当前页，进行初始化数据
   this.initData()
 }
 ```
@@ -1722,17 +1927,18 @@ handleCurrentChange (val) {
 </el-button>
 
 <el-table-column label="操作" width="120px">
-  <template #default="{ row }">
+  <template #default="obj">
     <div class="actions">
-      <i class="el-icon-view" @click="openDrawer('preview', row.id, )"></i>
-      <i class="el-icon-edit-outline" @click="openDrawer('edit', row.id)"></i>
+      <i class="el-icon-view" @click="openDrawer('preview', obj.row.id, )"></i>
+      <i class="el-icon-edit-outline" @click="openDrawer('edit', obj.row.id)"></i>
       <i class="el-icon-delete" @click="del(row.id)"></i>
     </div>
   </template>
 </el-table-column>
 
 openDrawer (type, id) {
-  console.log(type, id)
+  // 点哪个按钮去根据字段判断当前进行的什么操作
+  console.log(type)
 }
 ```
 
@@ -1741,6 +1947,12 @@ openDrawer (type, id) {
 ### 打开抽屉 - 显示抽屉
 
 ```jsx
+<!-- drawer 外层放，固定定位
+         title 配置标题
+         :visible.sync  绑定一个布尔值,控制显示隐藏(.sync修饰符，后面人资讲)
+         direction="rtl"   从右侧弹出 从右往左开
+         :before-close    处理弹窗关闭事件
+    -->
 <el-drawer
   :visible.sync="isShowDrawer"
   :before-close="handleClose"
@@ -1757,17 +1969,18 @@ data () {
     pageSize: 10,
     total: 0,
     list: [],
-    isShowDrawer: false
+    isShowDrawer: false  //默认不显示
   }
 },
 
 
 openDrawer (type, id) {
-  console.log(type, id)
-  this.isShowDrawer = true
+  //console.log(type, id)
+  this.isShowDrawer = true  // 显示弹窗
 },
 handleClose () {
-  this.isShowDrawer = false
+  //console.log('关闭弹窗')
+  this.isShowDrawer = false  // 关闭弹窗
 }
 ```
 
@@ -1787,12 +2000,13 @@ data () {
     total: 0,
     list: [],
     isShowDrawer: false,
-    drawerType: ''
+    drawerType: ''    //弹框操作类型   默认没有打开弹框，初始值为 '' add preview edit
   }
 },
 methods: {  
     openDrawer (type, id) {
       // console.log(type, id)
+        // type 的值 add preview edit => 对应(自动)设置标题 => 计算属性
       this.drawerType = type
       this.isShowDrawer = true
     },
@@ -1800,7 +2014,7 @@ methods: {
     
 computed: {
   drawerTitle () {
-    let title = '大标题'
+    let title = '默认大标题'
     if (this.drawerType === 'add') title = '添加面经'
     if (this.drawerType === 'preview') title = '面经预览'
     if (this.drawerType === 'edit') title = '修改面经'
@@ -1815,7 +2029,7 @@ computed: {
 <el-drawer
   :visible.sync="isShowDrawer"
   :before-close="handleClose"
-  :title="drawerTitle"
+  :title="drawerTitle"     //
   direction="rtl"
 >
   <span>我来啦!</span>
@@ -1826,7 +2040,7 @@ computed: {
 
 ### 表单结构
 
-![image-20220619062259040](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220619062259040.png)
+![image-20220619062259040](images/image-20220619062259040.png)
 
 ```jsx
 <el-form ref="form" label-width="80px">
@@ -1842,10 +2056,10 @@ computed: {
   </el-form-item>
 </el-form>
 
-
+//data
 form: {
-  stem: '',
-  content: ''
+  stem: '', // 标题
+  content: ''  // content
 }
 ```
 
@@ -1886,7 +2100,7 @@ export default {
     <el-input v-model="form.stem" placeholder="输入面经标题"></el-input>
   </el-form-item>
   <el-form-item label="内容" prop="content">
-    <quill-editor v-model="form.content"></quill-editor>
+    <quill-editor v-model="form.content"></quill-editor>  //
   </el-form-item>
   <el-form-item>
     <el-button type="primary">确认</el-button>
@@ -1905,6 +2119,9 @@ export default {
     <el-input v-model="form.stem" placeholder="输入面经标题"></el-input>
   </el-form-item>
   <el-form-item label="内容" prop="content">
+      <!-- 注意：这个quill-editor不是element的表单元素，不受element的直接控制，blur无效的
+                    需要手动注册blur事件，调用form的校验
+               -->
     <quill-editor v-model="form.content"></quill-editor>
   </el-form-item>
   <el-form-item>
@@ -1932,6 +2149,7 @@ rules: {
 `api/article.js`
 
 ```jsx
+// 新增文章
 export const createArticle = data => {
   return request.post('/admin/interview/create', data)
 }
@@ -1941,17 +2159,23 @@ export const createArticle = data => {
 
 ```jsx
 handleClose () {
+    // 将表单内容重置！！
   this.$refs.form.resetFields()
   this.isShowDrawer = false
 },
 async submit () {
-  try {
-    await this.$refs.form.validate()
-    await createArticle(this.form)
-    Message.success('添加成功')
-    this.current = 1
-    this.initData()
-    this.handleClose()
+   try {
+        // 1.校验表单
+        this.$refs.form.validate()
+        // 2.发送请求
+        await createArticle(this.form)
+        // 3.添加提示
+        this.$message.success('添加成功')
+        // 4.重新渲染,新增是新增到第一页去的
+        this.current = 1
+        this.initData()
+        // 5.关闭弹框s
+        this.handleClose()
   } catch (e) {
     console.log(e)
   }
@@ -1969,11 +2193,24 @@ async submit () {
 ```jsx
 export const removeArticle = id => {
   return request.delete('/admin/interview/remove', {
+      // 参数传递在请求体
     data: {
       id
     }
   })
 }
+
+/*
+  对于get和delete，如果要传递参数，必须先传对象，对象里面去配置 params(地址栏) 或 data(请求体)
+  axios.get(url,config)
+  axios.delete(url,config)
+
+  对于下面三种情况，第二个直接写参数对象即可
+  axios.put(url,data,config)
+  axios.patch(url,data,config)
+  axios.post(url,data,config)
+*/
+
 ```
 
 页面中，注册点击事件调用
@@ -1984,7 +2221,7 @@ export const removeArticle = id => {
 async del (id) {
   await removeArticle(id)
   this.$message.success('删除成功')
-  this.initData()
+  this.initData()  //重新渲染
 },
 ```
 
@@ -2001,6 +2238,7 @@ async del (id) {
 `api/article.js`
 
 ```jsx
+// 获取单个面经详情
 export const getArticleDetail = id => {
   return request.get('/admin/interview/show', {
     params: {
@@ -2018,8 +2256,10 @@ async openDrawer (type, id) {
   this.drawerType = type
   this.isShowDrawer = true
 
+ // 除了添加， 编辑和预览，都是要回显
   if (type !== 'add') {
     const res = await getArticleDetail(id)
+    //将res.data的所有数据，展开到form中，用于回显
     this.form = {
       ...res.data
     }
