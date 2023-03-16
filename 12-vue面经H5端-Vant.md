@@ -2329,6 +2329,8 @@ yarn build
 
 ## 配置publicPath
 
+`vue.config.js`
+
 ```js
 module.exports = {
   // 设置获取.js,.css文件时，是以相对地址为基准的。

@@ -1560,6 +1560,8 @@ yarn add echarts
 导入
 
 ```jsx
+// 将 echarts 里面的所有的按需，全部导入进来，收集到一个对象中
+// 引包
 import * as echarts from 'echarts'
 ```
 
@@ -2261,7 +2263,7 @@ async openDrawer (type, id) {
     const res = await getArticleDetail(id)
     //将res.data的所有数据，展开到form中，用于回显
     this.form = {
-      ...res.data
+      ...res.data         // stem:res.data.stem, content:res.data.content
     }
   }
 },
@@ -2272,6 +2274,7 @@ async openDrawer (type, id) {
 `api/article.js`准备api
 
 ```jsx
+// 用户修改了内容，一点击提交按钮，进行更新操作
 export const updateArticle = data => {
   return request.put('/admin/interview/update', data)
 }
@@ -2284,6 +2287,7 @@ async submit () {
   try {
     // 校验表单
     await this.$refs.form.validate()
+      
     // 如何区分, 当前是 编辑 还是 添加
     if (this.drawerType === 'add') {
       // 发送请求
@@ -2291,12 +2295,14 @@ async submit () {
       // 添加提示 $message.success
       this.$message.success('添加成功')
     }
+      
     if (this.drawerType === 'edit') {
       // 发送的是编辑的请求
       const { id, stem, content } = this.form
       await updateArticle({ id, stem, content })
       this.$message.success('修改成功')
     }
+      
     // 无论是修改还是添加, 都会回到第一页, 重置页码
     this.current = 1
     // 重新渲染
@@ -2320,6 +2326,7 @@ async submit () {
   <h5>{{ form.stem }}</h5>
   <div v-html="form.content"></div>
 </div>
+
 <el-form v-else :model="form" :rules="rules" ref="form" label-width="80px">
   ...
 </el-form>
