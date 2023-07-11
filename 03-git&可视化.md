@@ -303,6 +303,7 @@ toast.show()
 3. 编写js代码
 
 ```jsx
+// 放到公共的 common.js
 // bootstrap轻提示 封装轻提示函数 tip 
 const toastBox = document.querySelector('#myToast')
 const toast = new bootstrap.Toast(toastBox, {
@@ -472,7 +473,7 @@ git commit -m '登录功能完成'
 
 ### 什么是jwt身份认证
 
-> json web token
+> **json web token**
 
 在前后端分离模式的开发中，服务器如何知道来访者的身份呢？
 
@@ -512,7 +513,7 @@ document.querySelector('#btn-login').addEventListener('click', async function() 
 
 小结：
 
-1. 什么是jwt？ 是一个基于 **token令牌** 的身份认证机制
+1. 什么是jwt？ 是一个基于 **token令牌** 的身份认证机制！
 2. 登录请求后，后台返回token，前端该如何操作？  将token存储与本地，下次请求时在请求头携带。
 3. 未登录的用户可以直接访问首页吗？ 不可以
 4. 如何判断有没有登录？ 判断是否有 token 令牌
@@ -539,7 +540,7 @@ document.querySelector('#btn-login').addEventListener('click', async function() 
 </script>
 ```
 
-> 注意：上述判断只能判断token有没有，但不能判断token的真假，所以将来需要发送Ajax请求，根据服务器响应结果再次判断
+> 注意：`上述判断只能判断token有没有，但不能判断token的真假`，所以将来需要发送Ajax请求，根据服务器响应结果再次判断
 
 > 前端只能判断有没有token，无法界定真假后端是能知道真假的，所以将来我们请求后端后，需要对响应结果做判断 （后续会实现）
 
@@ -632,9 +633,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
     
-  // 在发送请求之前做些什么
+    // 在发送请求之前做些什么
     //如果有 token 的情况，应该将 token 携带在请求头中  （在拦截器中统一操作）
-    //console.log('你要请求了么？没带token吧，我来帮你吧')
+   
   const token = localStorage.getItem('user-token')
   if (token) {
       //如果有token，需要携带在请求头
@@ -645,15 +646,6 @@ axios.interceptors.request.use(function (config) {
   return config;  //这里返回的是请求的配置项，不能删除！
 }, function (error) {
   // 对请求错误做些什么
-  return Promise.reject(error);
-});
-
-// 添加响应拦截器
-axios.interceptors.response.use(function (response) {
-  // 对响应数据做点什么
-  return response;  ////response 就是响应的结果
-}, function (error) {
-  // 对响应错误做点什么
   return Promise.reject(error);
 });
 ```
@@ -868,7 +860,7 @@ tips: `git branch -a`  查看分支
 - 作用：拉取更新，将远程的代码下载合并到本地的分支
 
 
-- 通常在push前，需要先pull一次。（git push 之前一般先 git pull 一下）
+- `通常在push前，需要先pull一次。（git push 之前一般先 git pull 一下）`
 
 ```bash
 # 获取远程仓库的更新，并且与本地的分支进行合并
@@ -886,7 +878,7 @@ git pull origin login  # 获取远程分支的更新，并更新合并到login�
 先在本地建立一个分支，并切换到该分支，然后从远程分支上同步代码到该分支上，并建立关联
 
 ```git
-git checkout -t origin/develop     #远端分支名和本地新建分支名同名
+git checkout -t origin/分支名     #远端分支名和本地新建分支名同名
 ```
 
 **后续拉取该分支的更新，就是切换到该分支，git  pull  origin 分支名**
@@ -1073,16 +1065,17 @@ const option = {
     },
     tooltip: {}, // 提示框组件
     legend: {  // 图例组件
-        data: ['销量2']  // 图例的数据数组,对应series里的name
+        data: ['销量2']  // 图例的数据数组,对应series里的name  data中的数据标识，必须和series数据项的name对应
     },
     xAxis: { // 直角坐标系 grid 中的 x 轴
         data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
     },
     yAxis: { // 直角坐标系 grid 中的 y 轴, y轴里的data没有指定会自动从series.data里获取
     },
+    // 图表的数据项
     series: [{
         name: '销量2', // 系列名称，用于tooltip的显示，legend 的图例筛选
-        type: 'bar',  // 柱状图
+        type: 'bar',  // 柱状图  图表的类型
         data: [5, 20, 36, 10, 10, 20] // 系列中的数据内容数组。数组项通常为具体的数据项
     }]
 };
@@ -1094,17 +1087,20 @@ const option = {
 
 - series：系列列表（图标的数据项）。每个系列通过 `type` 决定（bar：柱状图，line：折线图，pie：饼图）自己的图表类型
 - xAxis：直角坐标系 grid 中的 x 轴数据  type：category：离散型刻度
+-  axisLine : x轴轴线
+- axisLabel：x轴刻度 （一月、二月、三月...）
 - yAxis：直角坐标系 grid 中的 y 轴数据   type：value ：值类型刻度
+- splitLine:  分隔线
 - grid：直角坐标系内绘图网格。   containLabel: true 绘图网格，是否包含刻度
 - title：标题组件 
   1. text：主标题文本
   2. textStyle: 文字样式   color  fontSize
-- tooltip：提示框组件 (鼠标划上去的提示)  trigger:提示触发显示的方式
+- tooltip：提示框组件 (鼠标划上去的提示)  trigger:提示触发显示的方式  axis  ：坐标轴触发
 - legend：图例组件   data中的数据标识，必须和下面的数据项series 的 name对应
 - color：调色盘颜色列表
 - toolbox：工具盒子  feature：{  saveAsImage：{} //是否保存图片 }
 
-
+ 
 
 ## 数据看板
 
@@ -1145,47 +1141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 相似案例：https://echarts.apache.org/examples/zh/editor.html?c=line-smooth
 
-图表基本初始化：
 
-```jsx
-document.addEventListener('DOMContentLoaded', async () => {
-  ...
-  
-  //调用函数 2021全学科薪资走势
-  initYearChart()
-})
-
-//封装一个 渲染2021全学科薪资走势
-const initYearChart = () => {
-  // 1.基于准备好的dom，初始化echarts实例
-  const myChart = echarts.init(document.querySelector('#line'))
-
-  // 2.指定图表的配置项和数据
-  const option = {
-    xAxis: {
-      type: 'category',
-      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    },
-    yAxis: {
-      type: 'value',
-    },
-    series: [
-      {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
-        type: 'line',
-        smooth: true,
-      },
-    ],
-  }
-
-  // 3.使用刚指定的配置项和数据显示图表。
-  myChart.setOption(option)
-}
-```
-
-按照需求定制：
-
-完整代码：
 
 - 基于数据，动态渲染，修改配色
 
@@ -1281,7 +1237,7 @@ function initYearChart(year) { //接收数据
                 width: 3
             },
             smooth: true, //是否平滑过渡
-            areaStyle: { //阴影
+            areaStyle: { //阴影 区域填充样式
                 color: { // 线性渐变，前四个参数分别是 x0, y0, x2, y2, 范围从 0 - 1，相当于在图形包围盒中的百分比，如果                                globalCoord 为 `true`，则该四个值是绝对的像素位置
                     type: 'linear',
                     x: 0,
@@ -1320,71 +1276,7 @@ function initYearChart(year) { //接收数据
 
 相似案例：https://echarts.apache.org/examples/zh/editor.html?c=pie-borderRadius
 
-基本初始化：
 
-```jsx
-document.addEventListener('DOMContentLoaded', async () => {
-  ...
-  // 班级薪资分布图
-  initSalaryChart(data.salaryData)  //调用函数，传入数据给形参
-})
-
-const initSalaryChart = (salaryData) => {
-  // 基于准备好的dom，初始化echarts实例
-  const myChart = echarts.init(document.querySelector('#salary'))
-
-  const option = {
-    tooltip: {
-      trigger: 'item',
-    },
-    legend: {
-      top: '5%',
-      left: 'center',
-    },
-    series: [
-      {
-        name: 'Access From',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: {
-          borderRadius: 10,
-          borderColor: '#fff',
-          borderWidth: 2,
-        },
-        label: {
-          show: false,
-          position: 'center',
-        },
-        emphasis: {
-          label: {
-            show: true,
-            fontSize: '40',
-            fontWeight: 'bold',
-          },
-        },
-        labelLine: {
-          show: false,
-        },
-        data: [
-          { value: 1048, name: 'Search Engine' },
-          { value: 735, name: 'Direct' },
-          { value: 580, name: 'Email' },
-          { value: 484, name: 'Union Ads' },
-          { value: 300, name: 'Video Ads' },
-        ],
-      },
-    ],
-  }
-
-  // 使用刚指定的配置项和数据显示图表。
-  myChart.setOption(option)
-}
-```
-
-
-
-完整代码：
 
 - 基于数据，动态渲染
 
@@ -1438,7 +1330,7 @@ const initSalaryChart = (salaryData) => {
                 show: false, //文字说明，默认不显示
                 position: 'center' //所有的文字中间显示
             },
-            //控制样式效果
+            //控制文字样式效果
             emphasis: {
                 label: {
                     show: true,
@@ -1481,37 +1373,6 @@ const initSalaryChart = (salaryData) => {
 2. 按照需求定制图表
 
 相似案例：https://echarts.apache.org/examples/zh/editor.html?c=bar-simple
-
-```jsx
-document.addEventListener('DOMContentLoaded', async () => {
-  ...
-  initGroupChart(data.groupData)
-})
-
-const initGroupChart = (groupData) => {
-  // 基于准备好的dom，初始化echarts实例
-  const myChart = echarts.init(document.getElementById('lines'))
-
-  const option = {
-    xAxis: {
-      type: 'category',
-      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        data: [120, 200, 150, 80, 70, 110, 130],
-        type: 'bar'
-      }
-    ]
-  };
-
-  // 使用刚指定的配置项和数据显示图表。
-  myChart.setOption(option)
-}
-```
 
 
 
@@ -1628,9 +1489,11 @@ const initGroupChart = (groupData) => {
                 //给自己加上
             e.target.classList.add('btn-blue')
 
-            //获取组号
+            //获取组号 点击的是谁拿就就是谁的组号 文本就是组号
             const group = e.target.innerHTML
                 //console.log(group) //拿到当前点击的组号
+            
+            
                 //1.修改option 配置项（修改三个配置项）
             option.xAxis.data = groupData[group].map(item => item.name)
             option.series[0].data = groupData[group].map(item => item.hope_salary)
@@ -1648,7 +1511,7 @@ const initGroupChart = (groupData) => {
 
 ### 男女薪资分布
 
-![image-20220516010447608](assets/image-20220516010447608.png)
+![image-20220516010447608](assets/image-20220516010447608.png)  
 
 基本步骤：
 
@@ -1657,58 +1520,7 @@ const initGroupChart = (groupData) => {
 
 相似案例：https://echarts.apache.org/examples/zh/editor.html?c=pie-simple
 
-```jsx
-document.addEventListener('DOMContentLoaded', async () => {
-  ...
-  initSalaryPieChart(data.salaryData)
-})
 
-const initSalaryPieChart = (salaryData) => {
-  const myEchart = echarts.init(document.querySelector('#gender'))
-
-  const option = {
-    title: {
-      text: 'Referer of a Website',
-      subtext: 'Fake Data',
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'item'
-    },
-    legend: {
-      orient: 'vertical',
-      left: 'left'
-    },
-    series: [
-      {
-        name: 'Access From',
-        type: 'pie',
-        radius: '50%',
-        data: [
-          { value: 1048, name: 'Search Engine' },
-          { value: 735, name: 'Direct' },
-          { value: 580, name: 'Email' },
-          { value: 484, name: 'Union Ads' },
-          { value: 300, name: 'Video Ads' }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
-      }
-    ]
-  }
-
-  myEchart.setOption(option)
-}
-```
-
-
-
-修改数据后，完整代码：
 
 ```jsx
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1734,6 +1546,7 @@ function initGenderChart(salaryData) {
                     fontSize: 16
                 }
             },
+                // 可以理解为通过定位来挪位置
             {
                 text: '男生',
                 left: 'center',
@@ -2191,12 +2004,13 @@ modal.toggle() // 切换
         const modalBox = document.querySelector('#modal')
         const modal = new bootstrap.Modal(modalBox) //创建实例
 
+        // 添加学员按钮 注册点击事件
         document.querySelector('#openModal').addEventListener('click', () => {
-            //1.重置表单
+            //1.重置表单（如果不重置表单，上一次写的内容还在）
             document.querySelector('#form').reset()
-                //2.设置标题
+            //2.设置标题
             document.querySelector('#modal .modal-title').innerHTML = '添加学员'
-                //3.添加一个标识，将来区分到底是添加还是修改
+                //3.添加一个标识，将来区分到底是添加还是修改（共用同一个弹框）
                 //如果是添加，记录一个字符串 "add"
                 //如果是修改，记录一个修改的id
                 //发现记录的值是字符串，说明是添加 否则是修改
@@ -2231,6 +2045,7 @@ modal.toggle() // 切换
                     //把省的数据渲染到省的下拉框中
                     //细节：option 标签value 属性记得设置值
                 const pStr = province.map(item => `<option value="${item}">${item}</option>`).join('')
+                // 一上来就显示省的名字不合适，要显示默认的  ${pStr}里装着很多option
                 pSelect.innerHTML = `<option value="">--省份--</option>${pStr}`
 
                 //2.监听省份的选择
@@ -2238,7 +2053,8 @@ modal.toggle() // 切换
                 pSelect.addEventListener('change', async() => {
                     //console.log(pSelect.value) //当前省份
 
-                    aSelect.value = '' //重置区
+                    aSelect.value = '' //重置区 (只重置区即可，下面动态渲染时，其实已经重置了)
+                 // cSelect.value = ''
 
                     //动态渲染城市
                     const {data: city} = await axios.get('/api/city', {
@@ -2340,7 +2156,7 @@ document.querySelector('.list').addEventListener('click', async (e) => {
   if (btn.classList.contains('bi-pen')) {
     modalBox.querySelector('.modal-title').innerHTML = '修改学员'
       //将点击的编辑按钮的id，存到对话框上（对话框是唯一的，要改谁，就存谁的id）
-    modalBox.dataset.id = btn.dataset.id
+    modalBox.dataset.id = btn.dataset.id   // 元素上面就会存上data-id属性
     modal.show()
   }
 })
@@ -2353,8 +2169,6 @@ document.querySelector('.list').addEventListener('click', async (e) => {
 2. 遍历表单实现基本回显
 3. 处理性别回显
 4. 处理省市区回显
-
-核心代码：
 
 基本回显
 
@@ -2376,12 +2190,16 @@ document.querySelector('.list').addEventListener('click', async (e) => {
                     //console.log(student) //查询学生详情成功
                     //遍历表单完成回显 获取表单里所有有name属性的表单元素
                     //伪数组转换为真数组
+                    // [name] 表示所有 有 name 的表单属性的都获取！
                 const fields = Array.from(modalBox.querySelectorAll('#form [name]'))
                 fields.forEach(item => {
+                        // item 表示所有有name属性的表单元素   
                     
                         //处理性别回显
                         if (item.name === 'gender') {
                             //单选框要单独处理,两个单选框，不能都选中
+                            // input.value === genger:1 (gender 是data里返回的数据)
+                            // 看 input.value值和 student的gender值是否相等，相等才选中
                             if (+item.value === student.gender) {
                                 item.checked = true
                             }
