@@ -1565,7 +1565,7 @@ yarn add echarts
 import * as echarts from 'echarts'
 ```
 
-添加ref
+准备容器 添加ref
 
 ```html
 <div ref="box" class="chart-box" style="height: 500px"></div>

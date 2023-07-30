@@ -65,7 +65,7 @@ ES6 的模块化主要包含如下 3 种用法：
 
 ### 1.5.1 默认导出 和 默认导入
 
-默认导出的语法： `export default 默认导出的成员`
+默认导出的语法： `export default  值`   （只能导出一个）
 
 默认导入的语法： `import 接收名称 from '模块标识符'`
 
@@ -86,7 +86,7 @@ export default {
   b,
   fn
 }
-//不允许
+//不允许 不允许一个一个的导出
 //export default a
 //export default b
 ```
@@ -104,7 +104,7 @@ console.log(result)
 
 **注意点:** 
 
-- 每个模块中，只允许使用唯一的一次 export default !
+- **每个模块中，只允许使用唯一的一次 export default !**
 - 默认导入时的接收名称可以任意名称，只要是合法的成员名称即可
 
 
@@ -118,6 +118,8 @@ console.log(result)
 按需导出
 
 ```jsx
+// export 修饰定义语句
+
 export const a = 10
 export const b = 20
 export const fn = () => {
@@ -128,14 +130,17 @@ export const fn = () => {
 按需导入
 
 ```jsx
+// import {同名变量} from '模块名或路径'
+
 import { a, b as c, fn } from './xxx.js'
+// as 重命名
 ```
 
 **注意点:**
 
-- 每个模块中可以使用多次按需导出
-- 按需导入的成员名称必须和按需导出的名称保持一致
-- 按需导入时，可以使用as 关键字进行重命名
+- **每个模块中可以使用多次按需导出**
+- **按需导入的成员名称必须和按需导出的名称保持一致**
+- **按需导入时，可以使用as 关键字进行重命名**
 - 按需导入可以和默认导入一起使用
 
 ![image-20230201132840242](images\image-20230201132840242.png)
@@ -291,7 +296,7 @@ https://webpack.docschina.org/
      这是webpack的配置文件
      后续所有的配置都在这个js文件中
    
-     注意：这里只能使用commonJS规范的语法，不能使用ES6模块化语法
+     注意：这里只能使用commonJS规范的语法，不能使用ES6模块化语法!!!!!!!
    */
    module.exports = {
      // 入口: 从哪个文件开始打包
@@ -391,6 +396,7 @@ module.exports = {
     filename: 'bundle.js'
   },
 
+    
   // 打包模式 production 压缩/development 不压缩
   mode: 'development'
 }
@@ -401,11 +407,18 @@ module.exports = {
 
 重新 yarn build 打包
 
+```js
+// 打包模式
+
+"build" : "webpack --mode=production"       压缩
+"dev": "webpack serve --mode=development"   不压缩
+```
+
 从 yarn build 开始都走了哪些流程呢?
 
 ![image-20230202144021365](images\build.png)
 
-执行webpack命令, 找到配置文件, 从入口文件开始，基于依赖关系, 打包代码输出到指定位置
+**执行webpack命令, 找到配置文件, 从入口文件开始，基于依赖关系, 打包代码输出到指定位置**
 
 
 
@@ -536,7 +549,7 @@ webpack默认只认识 js 文件和 json文件, 但是webpack 可以使用 [load
 2. 配置
 
    ```js
-   module: {
+   module: { // 加载器
      // loader的规则
      rules: [
        {
@@ -648,7 +661,7 @@ imgE.src = one
 document.querySelector('#app').appendChild(imgE)
 ```
 
-没有错，的确认不出来,   此时需要用webpack5 内置的 asset 资源处理模块，来处理图片资源。
+没有错，的确认不出来,   此时需要用webpack5 内置的 **asset** 资源处理模块，来处理图片资源。
 
 webpack5 处理资源： https://webpack.docschina.org/guides/asset-modules/
 
@@ -856,6 +869,8 @@ allLis.forEach((item, index) => {
 
 //3.引入css文件
 //直接导入
+// webpack 默认只认识js和json文件，不认识其他文件，比如： css文件
+// 怎么办？配置 loader 让 loader 插件来帮助处理
 import './css/index.css'
 
 //4.引入less文件
@@ -892,6 +907,8 @@ myFn()
 
 **Source Map 就是一个信息文件，里面储存着位置信息。**
 
+**开发环境调错**： **可以准确追踪error 和 warning 在原始代码的位置。**
+
 也就是说，Source Map 文件中存储着代码压缩混淆前后的对应关系。有了它，出错的时候，除错工具将**直接显示原始代码，而不是转换后的代码**，能够极大的方便后期的调试。
 
 
@@ -911,6 +928,11 @@ myFn()
 // 此选项生产的Source Map能够保证"运行时报错的行数"与"源代码的行数"保持一直
 // devtool: 'eval-source-map',
 devtool: 'eval-source-map'
+
+// or
+
+devtool: 'inline-source-map'  // 开发环境下： 设置记录原始代码位置信息的功能
+                              // 仅适用于开发环境，不要在生产环境下使用（防止被轻易查看源码位置）
 ```
 
 
@@ -1000,9 +1022,11 @@ module.exports = {
 >
 > 解决: 起一个开发服务器, 缓存一些已经打包过的内容, 只重新打包修改的文件, 最终运行在内存中给浏览器使用
 
-> webpack开发服务器：把代码运行在内存中, 保存自动更新, 实时返回给浏览器显示
+> **webpack开发服务器：把代码运行在内存中, 保存自动更新, 实时返回给浏览器显示**
 
 ### 6.1 webpack-dev-server自动刷新
+
+作用：启动web服务，打包输出源码在内存，并检测代码变化热更新到网页
 
 1. 下载
 
@@ -1038,6 +1062,37 @@ devServer: {
 
 > webpack-dev-server和watch的区别:
 >
-> webpack-der-server 监测到代码变化后，浏览器可以看到及时更新的效果，但是并没有自动打包修改的代码
+> webpack-dev-server 监测到代码变化后，浏览器可以看到及时更新的效果，但是并没有自动打包修改的代码
 >
 > yarn build --watch 在监测到代码变化后自动打包修改的代码
+
+
+
+
+
+# 7. 解析别名 alias
+
+配置模块如何解析， 创建 import 或 require 的别名，来确保模块引入变得更简单。
+
+``` js
+module.exports = {
+    //...
+    resolve: {
+        alias: {
+            Mytils: path.resolve(__dirname, 'src/utils'),
+            '@': path.resolve(__dirname, 'src')
+        }
+    }
+}
+
+import {  }  from '../src/utils/check.js'
+
+import {  }  from '@/utils/check.js'
+```
+
+
+
+
+
+
+

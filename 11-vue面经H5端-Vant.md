@@ -161,8 +161,8 @@ new Vue ( {
 "editor.formatOnSave": false
 ```
 
-+ 注意：==eslint的配置文件必须在根目录下，这个插件才能才能生效。打开项目必须以根目录打开，一次打开一个项目==
-+ 注意：==使用了eslint校验之后，把vscode带的那些格式化工具全禁用了 Beatify ==
++ 注意：eslint的配置文件必须在根目录下，这个插件才能才能生效。打开项目必须以根目录打开，一次打开一个项目
++ 注意：使用了eslint校验之后，把vscode带的那些格式化工具全禁用了 Beatify 
 
 我的完整配置，供参考
 
@@ -193,6 +193,21 @@ new Vue ( {
   },
   // 保存代码，不自动格式化
   "editor.formatOnSave": false
+}
+
+// 或者
+
+{
+    "window.zoomLevel": 2,
+    "workbench.iconTheme": "vscode-icons",
+    "editor.tabSize": 2,
+    "emmet.triggerExpansionOnTab": true,
+    // 当保存的时候，eslint自动帮我们修复错误
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
+    },
+    // 保存代码，不自动格式化
+    "editor.formatOnSave": false
 }
 ```
 
@@ -301,9 +316,23 @@ export default router
 
 组件库并不是唯一的
 
-pc:  element-ui     iview      **ant-design**
+pc:  [element-ui](https://element.eleme.cn/#/zh-CN)    [element-plus](https://element-plus.gitee.io/zh-CN/)  [iview](https://iview.github.io/)      **[ant-design](https://antdv.com/components/overview-cn)**
 
-移动：vant-ui 
+移动：[vant-ui](https://vant-contrib.gitee.io/vant/v2/#/zh-CN/)     [Mint UI](http://mint-ui.github.io/docs/#/zh-cn2) (饿了么)    [Cube UI](https://didi.github.io/cube-ui/#/zh-CN/) (滴滴)
+
+
+
+## 全部导入和按需导入的区别
+
+目标：明确 **全部导入** 和 **按需导入** 的区别
+
+![68294468866](assets\1682944688666.png)
+
+区别：
+
+1.全部导入会引起项目打包后的体积变大，进而影响用户访问网站的性能
+
+2.按需导入只会导入你使用的组件，进而节约了资源
 
 ### 全部导入
 
@@ -418,15 +447,23 @@ module.exports = {
 
 注意：px不会等比例缩放，但是我们只需要写px，当前的webpack会自动将px转换成vw
 
+viewportWidth:设计稿的视口宽度
 
+1. vant-ui中的组件就是按照375的视口宽度设计的
+2. 恰好面经项目中的设计稿也是按照375的视口宽度设计的，所以此时 我们只需要配置375就可以了
+3. 如果设计稿不是按照375而是按照750的宽度设计，[那此时这个值该怎么填呢？](https://zhuanlan.zhihu.com/p/366664788)
 
 ## request模块 - axios封装
 
 接口文档地址：http://interview-api-t.itheima.net/swagger-ui/index.html#/
 
+接口文档地址：https://apifox.com/apidoc/project-934563/api-20384515
+
+基地址：http://interview-api-t.itheima.net/h5/
+
 我们会使用 axios 来请求后端接口, 一般都会对 axios 进行一些配置 (比如: 配置基础地址等)
 
-一般项目开发中, 都会对 axios 进行基本的二次封装, 单独封装到一个模块中, 便于使用
+一般项目开发中, 都会对 axios 进行基本的**二次封装**, 单独封装到一个模块中, 便于使用
 
 1. 安装 axios
 
@@ -531,6 +568,22 @@ export const delToken = () => {
 //使用
 //import { setToken } from '@/utils/storage'
 //setToken(res.data.token)
+```
+
+登录完成存储token到本地
+
+```jsx
+import { login } from '@/api/user'
+import { setToken } from '@/utils/storage'
+
+methods: {
+  async onSubmit (values) {
+    const { data } = await login(values)
+    setToken(data.token)
+    this.$toast.success('登录成功')
+    this.$router.push('/')
+  }
+}
 ```
 
 
@@ -660,10 +713,10 @@ const router = new VueRouter({
       component: Layout,
       redirect: '/article',
       children: [
-        { path: '/article', component: Article },
-        { path: '/like', component: Like },
-        { path: '/collect', component: Collect },
-        { path: '/user', component: User }
+        { path: 'article', component: Article },
+        { path: 'like', component: Like },
+        { path: 'collect', component: Collect },
+        { path: 'user', component: User }
       ]
     }
   ]
@@ -677,6 +730,7 @@ export default router
 ```jsx
 <template>
   <div class="layout-page">
+      // 路由出口
     <router-view></router-view>
      
      <!-- 配置 route 属性，开启tabbar的路由模式，给item配置to属性，定义跳转的地址 -->
@@ -861,7 +915,14 @@ export default {
 </style>
 ```
 
+## 登录表单中的细节分析
 
+1. @submit事件:当点击提交按钮时会自动触发submit事件
+2. v-model双向绑定：会自动把v-model后面的值和文本框中的值进行双向绑定
+3. name属性:收集的key的值，要和接口文档对应起来
+4. label:输入的文本框的title
+5. :rules: 表单的校验规则
+6. placeholder: 文本框的提示语
 
 ### 注册静态布局
 
@@ -1164,7 +1225,7 @@ router.beforeEach((to, from, next) => {
 
 ### 静态结构
 
-![image-20220614074054380](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220614074054380.png)
+![image-20220614074054380](images/image-20220614074054380.png)
 
 注册组件：
 
@@ -1723,7 +1784,7 @@ export default {
 
 https://vant-contrib.gitee.io/vant/v2/#/zh-CN/list
 
-![image-20220614081410184](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220614081410184.png)
+![image-20220614081410184](images/image-20220614081410184.png)
 
 ![](images\mj-fyjz1.png)
 
@@ -2008,7 +2069,7 @@ export default {
 
 准备动态路由
 
-![image-20220702082707782](C:/Users/ASUS/Desktop/wb/vue基础8.0-配套资料/01-PDF&笔记/images/image-20220702082707782.png)
+![image-20220702082707782](images/image-20220702082707782.png)
 
 页面中获取参数
 
