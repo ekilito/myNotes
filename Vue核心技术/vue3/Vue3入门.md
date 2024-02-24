@@ -126,6 +126,11 @@ export default {
 ```
 ## 3. **<script setup>**语法糖
 > **script标签添加 setup标记，不需要再写导出语句，默认会添加导出语句**
+>
+> 开启语法糖
+> 好处：1. 不需要在编写export default{} 2. 不需要再return让模板使用数据
+>
+> 把原本比较复杂的语法经过编译环境变成简单的语法 开发的体验更好 但是实际在浏览器中运行的还是原本的语法
 
 ```vue
 <script setup>
@@ -249,13 +254,13 @@ setTimeout(() => {
 
 # watch
 
-> 侦听一个或者多个数据的变化，数据变化时执行回调函数
+> 侦听一个或者多个数据的变化，数据变化时执行回调函数(支持副作用 ajax请求 dom操作)
 >
 > 俩个额外参数 :     
 >
 > **immediate** 控制立刻执行
 >
-> **deep**   开启深度侦听
+> **deep**   开启深度侦听 主要针对于嵌套层次比较深的对对象
 
 ## 1. 侦听单个数据
 ```vue
@@ -269,7 +274,8 @@ const setCount = () => {
 }
 
 // 2. 调用 watch 侦听变化
-// ref对象不需要加 .value
+// 参数1: 监听哪个数据就把它放过来 ref对象不需要加 .value 
+// 参数2：监听的数据发生变化时要执行的回调函数 
 watch(count,(newVal,oldVal) => {
    console.log('count变化了',newVal,oldVal)
 })
@@ -319,6 +325,8 @@ watch(
 ```
 ## 3. immediate
 > 在侦听器创建时立即出发回调，响应式数据变化之后继续执行回调
+>
+> 立即执行：初始化的时候 回调先执行一次 等到数据变化函数再次执行
 
 
 ```vue
@@ -339,6 +347,12 @@ watch(
 ```
 ## 4. deep
 > 通过watch监听的ref对象默认是浅层侦听的，直接修改嵌套的对象属性不会触发回调执行，需要开启deep
+>
+> 问题：
+>
+> deep为true Vue针对于传入的对象进行递归处理 如果要处理的对象非常大 会有性能问题
+>
+> 尽量少用deep 只有在要监听的属性并不确定在那一层 或者要监听的属性有很多个分布在不同的对象层次里
 
 ```vue
 <script setup>
@@ -380,6 +394,7 @@ watch(
 
 
 
+
 <script setup>
     
   // 1. 导入watch
@@ -411,10 +426,27 @@ watch(
 
 ```
 
-
 # 生命周期函数
 
+> 1. 什么是生命周期？从组件创建到销毁的各个阶段 时机到了就自动执行的函数
+> 2. 分阶段说明各个阶段都运行哪些函数？
+>    1.  初始化  beforeCreate - created - beforeMount - mounted
+>    2. 更新阶段 beforeUpdate - updated (只要数据变化 按照顺序重复执行)
+>    3. 销毁时 beforeDestory - destoryed (销毁时按照顺序执行一次)
+> 3. 业务高频使用的几个函数
+>    1. created -m ajax
+>    2. mounted - ajax + 和dom元素相关的初始化操作（echarts图表 + 地图图表）
+>    3. beforeDestory - 释放内存（清理定时器 clearInterval(timeId) + 清理全局绑定的高频时间window scroll）
+> 4. keep-alive
+>    1. 缓存组件 activated(当前缓存组件被激活时触发)
+>    2. deactivated（当前缓存组件失活时触发）
+
 ## 1. 选项式对比组合式
+
+> 组合式API的生命周期
+>
+> on + 生命周期函数 = 组合式API下调用的函数 onMounted( () => {  } )
+
 ![image.png](assets/6.png)
 ## 2. 生命周期函数基本使用
 > 1. 导入生命周期函数
@@ -434,6 +466,10 @@ onMounted(()=>{
 ```
 ## 3. 执行多次
 > 生命周期函数执行多次的时候，会按照顺序依次执行
+>
+> 本质：每次调用onMounted往Vue里添加回调函数 mountedList:[cb1, cb2] 等待组件渲染完毕dom可用 实际成熟 使用forEach遍历mountedList 依次执行里面的回调
+>
+> onMounted函数本身不会等待组件渲染完毕才执行  组件初始化的时候就执行  传入的回调函数cb 才会等到dom可用时在执行
 
 ```js
 <scirpt setup>
@@ -456,8 +492,8 @@ onMounted(()=>{
 
 ## 1. 父传子
 > 基本思想
-> 1. 父组件中给子组件绑定属性
-> 2. 子组件内部通过props选项接收数据
+> 1. 父组件中给子组件标签上绑定属性  <Son :name="name" />
+> 2. 子组件内部通过props选项接收数据  props: { name: { type: String } }
 >
 > 注意：
 >
@@ -469,9 +505,15 @@ onMounted(()=>{
 
 ## 2. 子传父
 > 基本思想
-> 1. 父组件中给子组件标签通过@绑定事件，父组件提供方法。
-> 2. 子组件通过 defineEmit 获取 emit 函数（因为没有this）
-> 3. 子组件通过 emit 触发事件，并且传递数据
+> 1. 父组件中给子组件标签通过@绑定自定义事件，等于号绑定一个父组件中的函数。父组件提供方法。<SonCom @get-title="getTitle" />
+> 2. 子组件内部通过 defineEmit 获取 emit 函数（因为没有this）  const emit = defineEmits('[ get-title ]')
+> 3. 子组件通过 emit 触发事件，并且传递数据 emit('get-title', 'this is title')
+>
+> 本质：在子组件中调用了父组件中的方法
+>
+> 流程：emit触发事件 - 通过自定义事件名找到父组件中的函数 - 触发这个函数
+>
+> 可不可以直接把一个函数通过父传子传过去 :http-request="upload"
 
 
 ![image.png](assets/8.png)
@@ -481,12 +523,17 @@ onMounted(()=>{
 # 模版引用
 
 > 概念：通过 ref标识 获取真实的 dom对象或者组件实例对象
+>
+> this.$refs.form.validate()
+>
+> 1. 通过ref标识拿到当前form组件实例对象
+> 2. 调用了它内部的方法 validate
 
 ## 1. 基本使用
 > 实现步骤：
-> 1. 调用ref函数生成一个ref对象
-> 2. 通过ref标识绑定ref对象到标签
-> 3. 组件挂载完毕之后才能获取 onMounted(()=> {})
+> 1. 调用ref函数生成一个ref对象  ref(null) -> divRef
+> 2. 通过ref标识绑定ref对象到标签  <div ref="divRef"></div>
+> 3. 组件挂载完毕之后才能获取 onMounted(()=> { console.log(divRef.value ) } )
 
 ![image.png](assets/9.png)
 ## 2. defineExpose
@@ -521,6 +568,40 @@ onMounted(()=>{
 > 顶层组件可以向底层组件传递方法，底层组件调用方法修改顶层组件的数据
 
 ![image.png](assets/14.png)
+
+```vue
+// 通过传递函数实现底层组件修改顶层组件中的数据
+
+const count = ref(100)
+
+const setCount = (newCount) => {
+   count.value = newCount
+}
+
+provide('count-key', { count,setCount })
+
+
+// 子组件
+
+const countOBJ = inject('count-key')
+// console.log(countOBJ)  // { count: refimpl , setCount: f }
+
+const changeCount = () => {
+   countOBJ.setCount(101)
+}
+
+{{ countOBJ.count }}
+<button @click=changeCount>修改count</button>
+```
+
+**思想**
+
+1. 在应用组件树中是不是只有一个顶层和一个底层？相对概念 存在很多个顶层和底层 只有存在这样的关系就可以使用这对API
+2. 这对API只在小范围内跨层组件传值时才使用， 传统的父子通信就还用父子通信就可以了
+3. APP（provide('key')）- Father(provide('key')) - Son(inject('key'))    取值遵守就近原则
+4. provide+inject 成对使用的 假如一个组件中使用了inject  限制了组件的上游必须提供一个provide 这个组件不够通用 不i你在组件树的任意位置放置
+
+
 
 # toRefs
 
